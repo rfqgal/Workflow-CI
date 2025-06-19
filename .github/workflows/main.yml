@@ -1,0 +1,67 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI Workflow - MLflow Socioeconomic Income Prediction Model Training
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: 
+      - master
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  train_model:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          auto-update-conda: true
+          activate-environment: workflow-env
+          python-version: 3.11
+          auto-activate-base: false
+
+      - name: Create Conda Environment from conda.yaml
+        shell: bash -l {0}
+        run: |
+          conda env update -n workflow-env -f MLProject/conda.yaml
+
+      - name: Install MLflow (Explicitly via pip)
+        shell: bash -l {0}
+        run: |
+          conda activate workflow-env
+          pip install mlflow==2.19.0 # Instal MLflow secara eksplisit
+
+      - name: Verify Conda Environment Setup (Post-Installation)
+        shell: bash -l {0}
+        run: |
+          conda activate workflow-env
+          conda info
+          conda list
+          pip freeze
+
+      - name: Run MLflow Project
+        shell: bash -l {0}
+        run: |
+          cd MLProject
+          conda activate workflow-env
+          mlflow run . --env-manager=local
+
+      - name: List MLflow Artifacts (Optional for Debugging)
+        shell: bash -l {0}
+        run: |
+          # Path ini harus relatif dari root repo, karena mlruns dibuat di dalam MLProject
+          echo "Listing MLflow Artifacts:"
+          ls -R MLProject/mlruns/
