@@ -29,25 +29,25 @@ jobs:
         with:
           miniconda-version: "latest"
           auto-update-conda: true
-          activate-environment: workflow-env
+          activate-environment: mlflow-env
           python-version: 3.11
           auto-activate-base: false
 
       - name: Create Conda Environment from conda.yaml
         shell: bash -l {0}
         run: |
-          conda env update -n workflow-env -f MLProject/conda.yaml
+          conda env update -n mlflow-env -f MLProject/conda.yaml
 
       - name: Install MLflow (Explicitly via pip)
         shell: bash -l {0}
         run: |
-          conda activate workflow-env
+          conda activate mlflow-env
           pip install mlflow==2.19.0 # Instal MLflow secara eksplisit
 
       - name: Verify Conda Environment Setup (Post-Installation)
         shell: bash -l {0}
         run: |
-          conda activate workflow-env
+          conda activate mlflow-env
           conda info
           conda list
           pip freeze
@@ -56,7 +56,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd MLProject
-          conda activate workflow-env
+          conda activate mlflow-env
           mlflow run . --env-manager=local
 
       - name: List MLflow Artifacts (Optional for Debugging)
